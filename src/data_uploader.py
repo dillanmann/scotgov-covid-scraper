@@ -8,10 +8,10 @@ class DataUploader:
         self.insert_dataset_sql = """
             INSERT INTO datasets(
                 id, date, total_tests, positive_tests, negative_tests, total_deaths,
-                ayrshireandarran_deaths, borders_deaths, dumfriesandgalloway_deaths,
-                fife_deaths, forthvalley_deaths, grampian_deaths, greaterglasgowandclyde_deaths,
-                highland_deaths, lanarkshire_deaths, lothian_deaths, orkney_deaths, shetland_deaths,
-                tayside_deaths) 
+                ayrshireandarran_cases, borders_cases, dumfriesandgalloway_cases,
+                fife_cases, forthvalley_cases, grampian_cases, greaterglasgowandclyde_cases,
+                highland_cases, lanarkshire_cases, lothian_cases, orkney_cases, shetland_cases,
+                tayside_cases) 
                 VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) 
                 returning id;"""
         self.date_already_exists_sql ="""
@@ -65,11 +65,11 @@ class DataUploader:
         try:
             cur = self.conn.cursor()
 
-            cur.execute(insert_dataset_sql, (str(data.id), data.date, data.total_tests, data.positive_tests,
-            data.negative_tests, data.total_deaths, data.ayrshireandarran_deaths, data.borders_deaths,
-            data.dumfriesandgalloway_deaths, data.fife_deaths, data.forthvalley_deaths, data.grampian_deaths,
-            data.greaterglasgowandclyde_deaths, data.highland_deaths, data.lanarkshire_deaths, data.lothian_deaths,
-            data.orkney_deaths, data.shetland_deaths, data.tayside_deaths))
+            cur.execute(self.insert_dataset_sql, (str(data.id), data.date, data.total_tests, data.positive_tests,
+            data.negative_tests, data.total_deaths, data.ayrshireandarran_cases, data.borders_cases,
+            data.dumfriesandgalloway_cases, data.fife_cases, data.forthvalley_cases, data.grampian_cases,
+            data.greaterglasgowandclyde_cases, data.highland_cases, data.lanarkshire_cases, data.lothian_cases,
+            data.orkney_cases, data.shetland_cases, data.tayside_cases))
 
             id = cur.fetchone()[0]
             self.conn.commit()
@@ -83,7 +83,7 @@ class DataUploader:
             cur.execute(self.date_already_exists_sql, [date,])           
 
             result = cur.fetchone()[0]
-            return True if result == 1 else False
             cur.close()
+            return True if result == 1 else False
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)

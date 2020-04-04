@@ -1,36 +1,60 @@
 import requests
 import os
-from bs4 import BeautifulSoup
+import sys
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys  
+from selenium.webdriver.chrome.options import Options  
 from src.scotgov_covid_scraper import ScotgovCovidScraper
 from src.data_uploader import DataUploader
 from src.data_set import Dataset
 
 if __name__ == "__main__":
 
-    page = requests.get("https://www.gov.scot/coronavirus-covid-19/")
-    soup = BeautifulSoup(page.content, 'html.parser')
+    args = sys.argv
+    if len(args) < 2:
+        raise Exception(
+            ('No URLS specified to parse. Provide urls by calling the program like: \n'
+                'python program.py "<url>;<url>"'))
 
-    covid_scraper = ScotgovCovidScraper(soup)
+    urls = args[1].split(';')
+    chrome_opts = Options()
+    chrome_opts.add_argument("--headless")  
+    chrome_opts.binary_location = 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
 
-    date = covid_scraper.get_date()
-    print(date)
+    driver = webdriver.Chrome(chrome_options=chrome_opts)
+    for url in urls:
+        driver.get(url)
 
-    total_tests = covid_scraper.get_total_infected()
-    print("total tests: " + str(total_tests))
+        if len(driver.find_elements_by_id('overview')) == 0:
+            raise Exception("Failed to find root data element")
 
-    positive_cases = covid_scraper.get_positive_cases()
-    print("positive cases: " + str(positive_cases))
+        covid_scraper = ScotgovCovidScraper(driver.page_source)
 
-    negative_cases = covid_scraper.get_negative_cases()
-    print("negative cases: " + str(negative_cases))
+        date = None
+        try:
+            date = covid_scraper.get_date()
+        except:
+            date_in = input("no date found, enter date for URL {} in format DD MONTH YYYY".format(url))
+            date = covid_scraper.parse_date(date_in)
 
-    total_deaths = covid_scraper.get_total_deaths()
-    print("total deaths: " + str(total_deaths))
+        print(date)
 
-    deaths_by_healthboard = covid_scraper.get_health_board_deaths()
-    print(deaths_by_healthboard)
+        total_tests = covid_scraper.get_total_tests()
+        print("total tests: " + str(total_tests))
 
-    dataset = Dataset(date, total_tests, positive_cases, negative_cases, total_deaths, deaths_by_healthboard)
+        positive_cases = covid_scraper.get_positive_cases()
+        print("positive cases: " + str(positive_cases))
 
-    with DataUploader() as uploader:
-        uploader.upload_data(dataset)
+        negative_cases = covid_scraper.get_negative_cases()
+        print("negative cases: " + str(negative_cases))
+
+        total_deaths = covid_scraper.get_total_deaths()
+        print("total deaths: " + str(total_deaths))
+
+        cases_by_healthboard = covid_scraper.get_health_board_cases()
+        print(cases_by_healthboard)
+
+        dataset = Dataset(date, total_tests, positive_cases, negative_cases, total_deaths, cases_by_healthboard)
+
+        with DataUploader() as uploader:
+            uploader.upload_data(dataset)
