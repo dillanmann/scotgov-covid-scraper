@@ -1,24 +1,11 @@
 import requests
 import os
 import sys
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.options import Options
 from src.scotgov_covid_scraper import ScotgovCovidScraper
 from src.data_uploader import DataUploader
 from src.data_set import Dataset
 
-def get_page_selenium(url):
-    chrome_opts = Options()
-    chrome_opts.add_argument("--headless")
-    chrome_opts.binary_location = 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
-
-    driver = webdriver.Chrome(chrome_options=chrome_opts)
-    driver.get(url)
-    return driver.page_source
-
-
-def get_page_requests(url):
+def get_page__via_requests(url):
     return requests.get(url).text
 
 
@@ -27,7 +14,7 @@ if __name__ == "__main__":
     urls = ['https://www.gov.scot/coronavirus-covid-19/']
 
     for url in urls:
-        page_source = get_page_requests(url)
+        page_source = get_page__via_requests(url)
 
         covid_scraper = ScotgovCovidScraper(page_source)
 
