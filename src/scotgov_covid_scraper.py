@@ -8,7 +8,7 @@ class ScotgovCovidScraper:
         self.content = content
         self.soup = BeautifulSoup(self.content, 'html.parser')
         self.number_pattern = r'([0-9]+(?:,[0-9]+)?)'
-        self.date_pattern = r'(\d{2}\s\w+\s2020)'
+        self.date_pattern = r'(\d{1,2}\s\w+\s\d{4})'
         self.total_tests_pattern = r'total of\s{0,1}([0-9]+(?:,[0-9]+)?)'
         self.date_selector = '#overview h3'
         self.total_tests_selector = '#overview > p'
@@ -47,7 +47,6 @@ class ScotgovCovidScraper:
     def get_total_tests(self):
         for element in self.soup.select(self.total_tests_selector):
             text = element.get_text(strip=True)
-            print(text)
             result = re.search(self.total_tests_pattern, text) 
             if result != None:
                 return self.parse_number(result.group(1))
