@@ -10,11 +10,11 @@ class ScotgovCovidScraper:
         self.number_pattern = r'([0-9]+(?:,[0-9]+)?)'
         self.date_pattern = r'(\d{1,2}\s\w+\s\d{4})'
         self.total_tests_pattern = r'total of\s{0,1}([0-9]+(?:,[0-9]+)?)'
-        self.date_selector = '#overview h3'
-        self.total_tests_selector = '#overview > p'
-        self.negative_cases_selector = '#overview > ul > li'
-        self.positive_cases_selector = '#overview > ul > li'
-        self.total_deaths_selector = '#overview > ul > li'
+        self.date_selector = '#preamble h3'
+        self.total_tests_selector = '#preamble > .body-content > p'
+        self.negative_cases_selector = '#preamble > .body-content > ul > li'
+        self.positive_cases_selector = '#preamble > .body-content > ul > li'
+        self.total_deaths_selector = '#preamble > .body-content > ul > li'
 
     def get_element_text(self, selector):
         return self.soup.select_one(selector).get_text(strip=True)
@@ -82,11 +82,11 @@ class ScotgovCovidScraper:
         return 0
 
     def get_health_board_cases(self):
-        rows = len(self.soup.select('#overview > table > tbody > tr'))
+        rows = len(self.soup.select('#preamble > div > table:nth-child(7) > tbody > tr'))
         data = {}
         for row in range(0, rows):
-            board_selector = '#overview > table > tbody > tr:nth-child({}) > td:nth-child(1)'.format(str(row+1))
-            cases_selector = '#overview > table > tbody > tr:nth-child({}) > td:nth-child(2)'.format(str(row+1))
+            board_selector = '#preamble > div > table:nth-child(7) > tbody > tr:nth-child({}) > td:nth-child(1)'.format(str(row+1))
+            cases_selector = '#preamble > div > table:nth-child(7) > tbody > tr:nth-child({}) > td:nth-child(2)'.format(str(row+1))
             board = unicodedata.normalize('NFKD', self.soup.select_one(board_selector).get_text(strip=True)).replace(' ', '').lower()
             cases_text = self.soup.select_one(cases_selector).get_text(strip=True)
             result = re.search(self.number_pattern, cases_text)
@@ -94,5 +94,8 @@ class ScotgovCovidScraper:
                 continue
             cases = int(result.group(1).replace(',', ''))
             data[board] = cases
+
+        if len(data) == 0:
+            raise Exception("failed to find cases by health board")
 
         return data

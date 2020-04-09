@@ -11,7 +11,7 @@ def get_page__via_requests(url):
 
 if __name__ == "__main__":
 
-    urls = ['https://www.gov.scot/coronavirus-covid-19/']
+    urls = ['https://www.gov.scot/publications/coronavirus-covid-19-tests-and-cases-in-scotland/']
 
     for url in urls:
         page_source = get_page__via_requests(url)
