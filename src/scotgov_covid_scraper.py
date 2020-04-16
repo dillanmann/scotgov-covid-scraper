@@ -82,11 +82,11 @@ class ScotgovCovidScraper:
         return 0
 
     def get_health_board_cases(self):
-        rows = len(self.soup.select('#preamble > div > table:nth-child(9) > tbody > tr'))
+        rows = len(self.soup.select('#preamble > div > table > tbody > tr'))
         data = {}
         for row in range(0, rows):
-            board_selector = '#preamble > div > table:nth-child(9) > tbody > tr:nth-child({}) > td:nth-child(1)'.format(str(row+1))
-            cases_selector = '#preamble > div > table:nth-child(9) > tbody > tr:nth-child({}) > td:nth-child(2)'.format(str(row+1))
+            board_selector = '#preamble > div > table > tbody > tr:nth-child({}) > td:nth-child(1)'.format(str(row+1))
+            cases_selector = '#preamble > div > table > tbody > tr:nth-child({}) > td:nth-child(2)'.format(str(row+1))
             board = unicodedata.normalize('NFKD', self.soup.select_one(board_selector).get_text(strip=True)).replace(' ', '').lower()
             cases_text = self.soup.select_one(cases_selector).get_text(strip=True)
             result = re.search(self.number_pattern, cases_text)
