@@ -1,9 +1,12 @@
+from datetime import timedelta
 import requests
 import os
 import sys
 from src.scotgov_covid_scraper import ScotgovCovidScraper
-from src.data_uploader import DataUploader
-from src.data_set import Dataset
+from src.data_provider import DataProvider
+from src.scraped_data_set import ScrapedDataSet
+from src.calculated_data_set import CalculatedDataSet
+from src.data_set import DataSet
 
 def get_page__via_requests(url):
     return requests.get(url).text
@@ -43,8 +46,14 @@ if __name__ == "__main__":
         cases_by_healthboard = covid_scraper.get_health_board_cases()
         print(cases_by_healthboard)
 
-        dataset = Dataset(date, total_tests, positive_cases,
+        scraped_data_set = ScrapedDataSet(total_tests, positive_cases,
                           negative_cases, total_deaths, cases_by_healthboard)
 
-        with DataUploader() as uploader:
-            uploader.upload_data(dataset)
+        with DataProvider() as provider:
+            daily_deaths = scraped_data_set.total_deaths - provider.get_total_deaths_for_date(date - timedelta(days=1))
+            print("daily deaths: " + str(daily_deaths))
+            calculated_data_set = CalculatedDataSet(daily_deaths)
+
+            dataset = DataSet(date, scraped_data_set, calculated_data_set)
+
+            provider.upload_data(dataset)
