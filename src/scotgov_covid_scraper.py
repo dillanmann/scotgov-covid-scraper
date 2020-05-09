@@ -10,7 +10,7 @@ class ScotgovCovidScraper:
         self.number_pattern = r'([0-9]+(?:,[0-9]+)?)'
         self.date_pattern = r'(\d{1,2}\s\w+\s\d{4})'
         self.total_tests_pattern = r'total of\s{0,1}([0-9]+(?:,[0-9]+)?)'
-        self.date_selector = '#preamble p'
+        self.date_selector = '#preamble h3'
         self.total_tests_selector = '#preamble > .body-content > p'
         self.negative_cases_selector = '#preamble > .body-content > ul > li'
         self.positive_cases_selector = '#preamble > .body-content > ul > li'
